@@ -8,6 +8,10 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
 COPY ["DockerCore/DockerCore.csproj", "DockerCore/"]
+COPY ["DockerCore/DockerCore.csproj", "DockerCore.Data/"]
+COPY ["DockerCore/DockerCore.csproj", "DockerCore.Cache/"]
+COPY ["DockerCore/DockerCore.csproj", "DockerCore.Cross/"]
+COPY ["DockerCore/DockerCore.csproj", "DockerCore.Business/"]
 RUN dotnet restore "DockerCore/DockerCore.csproj"
 COPY . .
 WORKDIR "/src/DockerCore"

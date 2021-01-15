@@ -1,4 +1,11 @@
+using DockerCore.Business;
+using DockerCore.Business.Abstract;
+using DockerCore.Cache;
+using DockerCore.Cache.Abstract;
 using DockerCore.Cross.Entities;
+using DockerCore.Data.Helpers;
+using DockerCore.Data.Service.Abstract;
+using DockerCore.Data.Service.Concrete;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -29,6 +36,12 @@ namespace DockerCore
 
             services.AddControllers();
             services.AddMvc();
+
+            services.AddScoped<IRouletteManager, RouletteManager>();
+            services.AddScoped<IRouletteService, DapperRouletteService>();
+            services.AddSingleton(Configuration);
+            services.AddScoped<ICacheService, RedisCacheService>();
+            SqlHelper.ConnectionString = Configuration.GetConnectionString("CrudApp");
 
             services.AddSwaggerGen(swagger =>
             {

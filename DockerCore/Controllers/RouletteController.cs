@@ -1,24 +1,40 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using DockerCore.Business.Abstract;
+using DockerCore.Cross.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace DockerCore.Controllers
 {
     [ApiController]
     [Produces("application/json")]
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class RouletteController : ControllerBase
     {
+        private readonly IRouletteManager _rouletteManager;
+
+        public RouletteController(IRouletteManager rouletteManager)
+        {
+            _rouletteManager = rouletteManager;
+        }
+
         /// <summary>
         /// Create the roulette
         /// </summary>
         /// <returns></returns>
-        [HttpGet]
-        [Route("Create")]
-        public IActionResult Create()
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> Create()
         {
-            return Ok();
+            var isCreated = await _rouletteManager.Add(new Roulette());
+            if (!isCreated)
+            {
+                return StatusCode(500);
+            }
+
+            return StatusCode(201);
         }
 
         /// <summary>
@@ -26,7 +42,7 @@ namespace DockerCore.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("Open")]
+        [Route("{Open}")]
         public IActionResult Open()
         {
             return Ok();
@@ -37,7 +53,7 @@ namespace DockerCore.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("Bet")]
+        [Route("{Bet}")]
         public IActionResult Bet()
         {
             return Ok();
@@ -48,7 +64,7 @@ namespace DockerCore.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("Close")]
+        [Route("{Close}")]
         public IActionResult Close()
         {
             return Ok();
@@ -59,7 +75,7 @@ namespace DockerCore.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("List")]
+        [Route("{List}")]
         public IActionResult List()
         {
             return Ok();
