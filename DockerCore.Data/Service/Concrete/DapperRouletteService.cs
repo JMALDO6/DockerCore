@@ -65,7 +65,7 @@ namespace DockerCore.Data.Service.Concrete
         private DynamicParameters SetParameters(Roulette roulette)
         {
             DynamicParameters parameters = new DynamicParameters();
-            parameters.Add("@DateCreation", roulette.DateCreation);
+            parameters.Add("@DateCreation", DateTime.Now);
 
             return parameters;
 

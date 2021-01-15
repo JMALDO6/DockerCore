@@ -41,7 +41,7 @@ namespace DockerCore
             services.AddScoped<IRouletteService, DapperRouletteService>();
             services.AddSingleton(Configuration);
             services.AddScoped<ICacheService, RedisCacheService>();
-            SqlHelper.ConnectionString = Configuration.GetConnectionString("CrudApp");
+            SqlHelper.ConnectionString = Configuration.GetConnectionString("BdApp");
 
             services.AddSwaggerGen(swagger =>
             {
