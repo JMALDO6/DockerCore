@@ -7,7 +7,7 @@ namespace DockerCore.Data.Service.Abstract
     {
         Task<List<T>> Search(int page, int pageSize);
         Task<T> GetById(int id);
-        Task<bool> Add(T model);
+        Task<T> Add();
         Task<bool> AddList(List<T> modelList);
         Task<bool> Delete(int id);
         Task<bool> Update(int id, T model);

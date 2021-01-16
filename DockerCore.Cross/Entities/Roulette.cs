@@ -5,7 +5,7 @@ namespace DockerCore.Cross.Entities
 {
     public class Roulette : IEntity
     {
-        public int Id { get; set; }
-        public DateTime DateCreation { get; set; }
+        public long Id { get; set; }
+        public DateTime CreationDate { get; set; }
     }
 }

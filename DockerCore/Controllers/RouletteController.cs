@@ -1,8 +1,11 @@
 ﻿using DockerCore.Business.Abstract;
 using DockerCore.Cross.Entities;
+using DockerCore.Cross.Helpers;
+using DockerCore.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
 
 namespace DockerCore.Controllers
@@ -23,40 +26,74 @@ namespace DockerCore.Controllers
         /// <summary>
         /// Create the roulette
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Roulette created</returns>
         [HttpPost]
-        [AllowAnonymous]
         public async Task<IActionResult> Create()
         {
-            var isCreated = await _rouletteManager.Add(new Roulette());
-            if (!isCreated)
+            try
             {
-                return StatusCode(500);
-            }
+                var roulette = await _rouletteManager.Add();
+                if (roulette is null)
+                {
+                    return StatusCode(500);
+                }
 
-            return StatusCode(201);
+                return StatusCode(201, roulette);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
         }
 
         /// <summary>
         /// Open the roulette
         /// </summary>
         /// <returns></returns>
-        [HttpGet]
-        [Route("{Open}")]
-        public IActionResult Open()
+        [HttpPost]
+        public async Task<IActionResult> Open(int id)
         {
-            return Ok();
+            try
+            {
+                var roulette = new Roulette { Id = id };
+                var isUpdated = await _rouletteManager.Open(roulette);
+
+                if (!isUpdated)
+                {
+                    return StatusCode(403, new ErrorModel { ErrorMessage = string.Format(MessageResource.ErrorNotFound, id) });
+                }
+
+                return StatusCode(201, new { Success = true });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
         }
 
         /// <summary>
         /// Bet in the roulette
         /// </summary>
         /// <returns></returns>
-        [HttpGet]
-        [Route("{Bet}")]
-        public IActionResult Bet()
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> Bet(BetRoulette betRoulette)
         {
-            return Ok();
+            try
+            {
+                var resultBet = await _rouletteManager.Bet(betRoulette);
+
+                if (!resultBet.Succesfull)
+                {
+                    return StatusCode(403, resultBet);
+                }
+
+                return StatusCode(201, resultBet);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
         }
 
         /// <summary>
