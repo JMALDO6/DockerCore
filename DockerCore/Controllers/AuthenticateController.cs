@@ -38,14 +38,11 @@ namespace DockerCore.Controllers
             try
             {
                 IActionResult response = Unauthorized();
-
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
                 }
-
                 var user = AuthenticateUser(loginModel);
-
                 if (user != null)
                 {
                     var tokenString = GenerateJsonWebToken();
@@ -67,9 +64,8 @@ namespace DockerCore.Controllers
         /// <returns>The user information</returns>  
         private User AuthenticateUser(LoginModel loginModel)
         {
-            User user = null;
-            user = new User { Name = "Test Roulette", Balance = 30000 };
-            
+            User user = new User { Name = "Test Roulette", Balance = 30000 };
+
             return user;
         }
 

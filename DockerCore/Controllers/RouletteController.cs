@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace DockerCore.Controllers
@@ -14,7 +13,7 @@ namespace DockerCore.Controllers
     [ApiController]
     [Produces("application/json")]
     [Route("api/[controller]/[action]")]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class RouletteController : ControllerBase
     {
         private readonly IRouletteManager _rouletteManager;
@@ -59,7 +58,6 @@ namespace DockerCore.Controllers
             {
                 var roulette = new Roulette { Id = id };
                 var isUpdated = await _rouletteManager.OpenRoulette(roulette);
-
                 if (!isUpdated)
                 {
                     return StatusCode(403, new ErrorModel { ErrorMessage = string.Format(MessageResource.ErrorNotFound, id) });
@@ -84,7 +82,6 @@ namespace DockerCore.Controllers
             try
             {
                 var resultBet = await _rouletteManager.BetInRoulette(betRoulette);
-
                 if (!resultBet.Succesfull)
                 {
                     return StatusCode(403, resultBet);
@@ -110,7 +107,6 @@ namespace DockerCore.Controllers
             {
                 var roulette = new Roulette { Id = id };
                 var resultRoulette = await _rouletteManager.ClosedRoulette(roulette);
-
                 if (resultRoulette is null)
                 {
                     return StatusCode(403, new ErrorModel { ErrorMessage = string.Format(MessageResource.ErrorNotFound, id) });
@@ -134,6 +130,7 @@ namespace DockerCore.Controllers
             try
             {
                 var rouletteList = await _rouletteManager.Search(page);
+
                 return StatusCode(200, rouletteList);
             }
             catch (Exception ex)

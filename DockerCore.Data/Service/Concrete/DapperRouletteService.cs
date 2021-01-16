@@ -18,12 +18,10 @@ namespace DockerCore.Data.Service.Concrete
             try
             {
                 using IDbConnection connection = new SqlConnection(SqlHelper.ConnectionString);
-
                 if (connection.State == ConnectionState.Closed)
                 {
                     connection.Open();
                 }
-
                 var idRoulette = await connection.ExecuteScalarAsync<long>("sp_RouletteSave",
                             commandType: CommandType.StoredProcedure);
 
@@ -46,11 +44,9 @@ namespace DockerCore.Data.Service.Concrete
                 {
                     connection.Open();
                 }
-
                 var result =  await connection.ExecuteScalarAsync<string>("sp_RouletteOpen",
                             param: SetParameters(roulette),
                             commandType: CommandType.StoredProcedure);
-
                 if (result.Equals("OK", StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
@@ -75,14 +71,11 @@ namespace DockerCore.Data.Service.Concrete
                 {
                     connection.Open();
                 }
-
                 var result = await connection.ExecuteScalarAsync<string>("sp_RouletteBet",
                             param: SetParameters(betRoulette),
                             commandType: CommandType.StoredProcedure);
-
                 if (result.Equals("OK", StringComparison.OrdinalIgnoreCase))
                 {
-
                     return true;
                 }
 
@@ -105,11 +98,9 @@ namespace DockerCore.Data.Service.Concrete
                 {
                     connection.Open();
                 }
-
                 var result = await connection.ExecuteScalarAsync<string>("sp_RouletteClosed",
                             param: SetParameters(roulette),
                             commandType: CommandType.StoredProcedure);
-
                 if (result.Equals("OK", StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
@@ -134,11 +125,9 @@ namespace DockerCore.Data.Service.Concrete
                 {
                     connection.Open();
                 }
-
                 var result = await connection.QueryAsync<BetRoulette>("sp_RouletteGetBets",
                             param: SetParameters(roulette),
                             commandType: CommandType.StoredProcedure);
-
 
                 return result.ToList();
             }
@@ -154,7 +143,6 @@ namespace DockerCore.Data.Service.Concrete
         {
             page = page <= 0 ? 0 : page - 1;
             int offset = page * pageSize;
-
             try
             {
                 using IDbConnection connection = new SqlConnection(SqlHelper.ConnectionString);
@@ -162,7 +150,6 @@ namespace DockerCore.Data.Service.Concrete
                 {
                     connection.Open();
                 }
-
                 var result = await connection.QueryAsync<Roulette>($"SELECT * FROM Roulette ORDER BY IdRoulette OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY");
 
                 return result.ToList();

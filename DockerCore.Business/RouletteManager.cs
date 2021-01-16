@@ -72,7 +72,6 @@ namespace DockerCore.Business
                 ValidateDollars(betRoulette))
             {
                 var resultBetBd = await _rouletteService.BetRoulette(betRoulette);
-
                 if (resultBetBd)
                 {
                     return new ResultBet { Succesfull = true, Message = MessageResource.OkBet };
@@ -90,7 +89,6 @@ namespace DockerCore.Business
         public async Task<ResultRoulette> ClosedRoulette(Roulette roulette)
         {
             var result = await _rouletteService.ClosedRoulette(roulette);
-
             if (result)
             {
                 var resultRoulette = new ResultRoulette
@@ -116,28 +114,33 @@ namespace DockerCore.Business
             string cacheKey = string.Format(ROULETTE_FILTER_KEY, page, PAGE_SIZE);
             var data = _cacheService.Get<List<Roulette>>(cacheKey);
             if (data != null)
+            {
                 return data;
-
+            }
             data = await _rouletteService.Search(page, PAGE_SIZE);
             if (data != null)
             {
                 _cacheService.Set(cacheKey, data, expirationTime);
+
                 return data;
             }
+
             return null;
         }
-
 
         #endregion
 
         #region Private Methods
 
+        /// <summary>
+        /// Generate number winner
+        /// </summary>
+        /// <returns>Number</returns>
         private int GenerateNumber()
         {
             var guid = Guid.NewGuid();
             var justNumbers = new string(guid.ToString().Where(Char.IsDigit).ToArray());
             var seed = int.Parse(justNumbers.Substring(0, 4));
-
             var random = new Random(seed);
             var value = random.Next(0, 36);
 
@@ -162,7 +165,6 @@ namespace DockerCore.Business
                 {
                     earnedMoney = betRoulette.Dollars * 1.8f;
                 }
-
                 betRoulette.EarnedMoney = earnedMoney;
             }
 

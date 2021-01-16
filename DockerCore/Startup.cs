@@ -33,26 +33,21 @@ namespace DockerCore
         {
             var jwtTokenConfig = Configuration.GetSection("JwtConfig").Get<JwtTokenConfig>();
             services.AddSingleton(jwtTokenConfig);
-
             services.AddControllers();
             services.AddMvc();
-
             services.AddScoped<IRouletteManager, RouletteManager>();
             services.AddScoped<IRouletteService, DapperRouletteService>();
             services.AddSingleton(Configuration);
             services.AddScoped<ICacheService, RedisCacheService>();
             SqlHelper.ConnectionString = Configuration.GetConnectionString("BdApp");
-
             services.AddSwaggerGen(swagger =>
             {
-                //This is to generate the Default UI of Swagger Documentation  
                 swagger.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
                     Title = "Roulette API",
                     Description = "Test Clean Code"
                 });
-                // To Enable authorization using Swagger (JWT)  
                 swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
                 {
                     Name = "Authorization",
@@ -77,7 +72,6 @@ namespace DockerCore
                     }
                 });
             });
-
             services.AddAuthentication(option =>
             {
                 option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -104,18 +98,15 @@ namespace DockerCore
             {
                 app.UseDeveloperExceptionPage();
             }
-
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Clean Code API V1");
                 c.RoutePrefix = string.Empty;
             });
-
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
