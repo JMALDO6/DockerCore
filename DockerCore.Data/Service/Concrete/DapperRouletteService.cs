@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DockerCore.Data.Service.Concrete
@@ -23,10 +24,10 @@ namespace DockerCore.Data.Service.Concrete
                     connection.Open();
                 }
 
-                var roulette = await connection.ExecuteScalarAsync<Roulette>("sp_RouletteSave",
+                var idRoulette = await connection.ExecuteScalarAsync<long>("sp_RouletteSave",
                             commandType: CommandType.StoredProcedure);
 
-                return roulette;
+                return new Roulette { Id = idRoulette };
             }
             catch (Exception ex)
             {
@@ -36,7 +37,7 @@ namespace DockerCore.Data.Service.Concrete
             }
         }
 
-        public async Task<bool> Open(Roulette roulette)
+        public async Task<bool> OpenRoulette(Roulette roulette)
         {
             try
             {
@@ -65,7 +66,7 @@ namespace DockerCore.Data.Service.Concrete
             }
         }
 
-        public async Task<bool> Bet(BetRoulette betRoulette)
+        public async Task<bool> BetRoulette(BetRoulette betRoulette)
         {
             try
             {
@@ -95,29 +96,83 @@ namespace DockerCore.Data.Service.Concrete
             }
         }
 
-        Task<bool> IService<Roulette>.AddList(List<Roulette> modelList)
+        public async Task<bool> ClosedRoulette(Roulette roulette)
         {
-            throw new NotImplementedException();
+            try
+            {
+                using IDbConnection connection = new SqlConnection(SqlHelper.ConnectionString);
+                if (connection.State == ConnectionState.Closed)
+                {
+                    connection.Open();
+                }
+
+                var result = await connection.ExecuteScalarAsync<string>("sp_RouletteClosed",
+                            param: SetParameters(roulette),
+                            commandType: CommandType.StoredProcedure);
+
+                if (result.Equals("OK", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return false;
+            }
         }
 
-        Task<bool> IService<Roulette>.Delete(int id)
+        public async Task<List<BetRoulette>> GetBetsRoulette(Roulette roulette)
         {
-            throw new NotImplementedException();
+            try
+            {
+                using IDbConnection connection = new SqlConnection(SqlHelper.ConnectionString);
+                if (connection.State == ConnectionState.Closed)
+                {
+                    connection.Open();
+                }
+
+                var result = await connection.QueryAsync<BetRoulette>("sp_RouletteGetBets",
+                            param: SetParameters(roulette),
+                            commandType: CommandType.StoredProcedure);
+
+
+                return result.ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return null;
+            }
         }
 
-        Task<Roulette> IService<Roulette>.GetById(int id)
+        public async Task<List<Roulette>> Search(int page, int pageSize)
         {
-            throw new NotImplementedException();
-        }
+            page = page <= 0 ? 0 : page - 1;
+            int offset = page * pageSize;
 
-        Task<List<Roulette>> IService<Roulette>.Search(int page, int pageSize)
-        {
-            throw new NotImplementedException();
-        }
+            try
+            {
+                using IDbConnection connection = new SqlConnection(SqlHelper.ConnectionString);
+                if (connection.State == ConnectionState.Closed)
+                {
+                    connection.Open();
+                }
 
-        Task<bool> IService<Roulette>.Update(int id, Roulette model)
-        {
-            throw new NotImplementedException();
+                var result = await connection.QueryAsync<Roulette>($"SELECT * FROM Roulette ORDER BY IdRoulette OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY");
+
+                return result.ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return null;
+            }
         }
 
         private DynamicParameters SetParameters(Roulette roulette)

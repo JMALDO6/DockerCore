@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DockerCore.Controllers
@@ -13,7 +14,7 @@ namespace DockerCore.Controllers
     [ApiController]
     [Produces("application/json")]
     [Route("api/[controller]/[action]")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class RouletteController : ControllerBase
     {
         private readonly IRouletteManager _rouletteManager;
@@ -32,7 +33,7 @@ namespace DockerCore.Controllers
         {
             try
             {
-                var roulette = await _rouletteManager.Add();
+                var roulette = await _rouletteManager.AddRoulette();
                 if (roulette is null)
                 {
                     return StatusCode(500);
@@ -49,14 +50,15 @@ namespace DockerCore.Controllers
         /// <summary>
         /// Open the roulette
         /// </summary>
-        /// <returns></returns>
+        /// <param name="id">Id roulette</param>
+        /// <returns>Result operation</returns>
         [HttpPost]
         public async Task<IActionResult> Open(int id)
         {
             try
             {
                 var roulette = new Roulette { Id = id };
-                var isUpdated = await _rouletteManager.Open(roulette);
+                var isUpdated = await _rouletteManager.OpenRoulette(roulette);
 
                 if (!isUpdated)
                 {
@@ -74,14 +76,14 @@ namespace DockerCore.Controllers
         /// <summary>
         /// Bet in the roulette
         /// </summary>
-        /// <returns></returns>
+        /// <param name="betRoulette">Bet</param>
+        /// <returns>Result operation</returns>
         [HttpPost]
-        [AllowAnonymous]
         public async Task<IActionResult> Bet(BetRoulette betRoulette)
         {
             try
             {
-                var resultBet = await _rouletteManager.Bet(betRoulette);
+                var resultBet = await _rouletteManager.BetInRoulette(betRoulette);
 
                 if (!resultBet.Succesfull)
                 {
@@ -99,12 +101,27 @@ namespace DockerCore.Controllers
         /// <summary>
         /// Close the roulette
         /// </summary>
+        /// <param name="id">Id roulette</param>
         /// <returns></returns>
-        [HttpGet]
-        [Route("{Close}")]
-        public IActionResult Close()
+        [HttpPost]
+        public async Task<IActionResult> Close(int id)
         {
-            return Ok();
+            try
+            {
+                var roulette = new Roulette { Id = id };
+                var resultRoulette = await _rouletteManager.ClosedRoulette(roulette);
+
+                if (resultRoulette is null)
+                {
+                    return StatusCode(403, new ErrorModel { ErrorMessage = string.Format(MessageResource.ErrorNotFound, id) });
+                }
+
+                return StatusCode(201, resultRoulette);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
         }
 
         /// <summary>
@@ -112,10 +129,17 @@ namespace DockerCore.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("{List}")]
-        public IActionResult List()
+        public async Task<IActionResult> List(int page)
         {
-            return Ok();
+            try
+            {
+                var rouletteList = await _rouletteManager.Search(page);
+                return StatusCode(200, rouletteList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
         }
     }
 }
